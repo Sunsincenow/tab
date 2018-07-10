@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		ul,li{
+			list-style: none;margin: 0;padding: 0;
+		}
+		.tit{
+			overflow: hidden;
+		}
+		.tit li{
+			width: 100px;
+			height: 40px;
+			line-height: 40px;
+			text-align: center;
+			background: orange;
+			float: left;
+		}
+		.tit li:hover,.tit .on{
+			background: lightblue;
+		}
+		.con li{
+			display: none;
+			width: 300px;
+			height: 200px;
+			background: gray;
+		}
+		.con li:first-child{
+			display: block;
+		}
+		.tit .clo{
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			background: gray;
+			font-style: normal;
+			line-height: 20px;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+		.tit .add,.tit .cancle{
+			float: left;
+			display: block;
+			width: 40px;
+			height: 40px;
+			font-size: 26px;
+			font-style: normal;
+			background-color: red;
+			color: #fff;
+			border-radius: 4px;
+			line-height: 40px;
+			cursor: pointer;
+			text-align: center;
+		}
+		.tit .add:hover,.tit .cancle{
+			background-color:#e03030; 
+		}
+		
+	</style>
+</head>
+<body>
+	<!-- 看sql语句：创建数据库，创建表，表关联join，增，删，改，查数据，子查询,建索引 ，多个表关联 ，临时表 -->
+	<ul class="tit">
+		<li>标题1 <i class="clo">×</i></li>
+		<li>标题2 <i class="clo">×</i></li>
+		<li>标题3 <i class="clo">×</i></li>
+		<i class="add">+</i>
+		<i class="cancle">←</i>
+	</ul>
+	<ul class="con">
+		<li>内容1</li>
+		<li>内容2</li>
+		<li>内容3</li>
+	</ul>
+	<script>
+		var tit=$('.tit');
+		var con=$('.con');
+		var tit_dom=$('.tit li');
+		var con_dom=$('.con li');
+		var clo_dom=$('.clo');
+		var add_dom=$('.add');
+		var can_dom=$('.cancle');
+		var len=tit_dom.length;
+		var canarr=[];
+		
+		tit[0].onclick=function(event){//事件委托：将点击事件赋给父元素
+			var tit_dom=$('.tit li');//更新节点
+			var con_dom=$('.con li');
+			var len=tit_dom.length;
+			var currDom=event.target;
+			
+			if(currDom.nodeName=='LI'){//点击标题，切换内容
+				let count=index(currDom);
+				//对应内容显示与隐藏
+				for (var j = 0; j < len; j++) {
+					hide(con_dom[j]);
+				};
+				show(con_dom[count]);
+				//给点击的标题加高亮效果
+				for (var k = 0; k < len; k++) {
+					titNo(tit_dom[k]);
+					// tit_dom[k].className=tit_dom[k].className.replace('on',' ').trim();//trim():从字符串中移除前导空格、尾随空格和行终止符。
+				};
+				titOn(tit_dom[count]);
+			}else if(currDom.className=='clo'){//点击关闭，移除标题及内容节点
+				let count=index(currDom.parentNode);
+				tit[0].removeChild(tit_dom[count]);
+				con[0].removeChild(con_dom[count]);
+				hide(con_dom[count]);
+				canarr.push([tit_dom[count],con_dom[count]]);
+				console.log(canarr);
+				//关闭后的显示内容
+				if(hasClass(currDom.parentNode,'on')){
+					show(con_dom[0]);
+					titOn(tit_dom[0]);
+				}
+			}
+		}
+		add_dom[0].onclick=function(){
+			let count=index(this);
+			// console.log(count);
+			var tit_add=document.createElement('li');
+			tit_add.innerHTML='标题X <i class="clo">×</i>';
+			var con_add=document.createElement('li');
+			con_add.innerHTML='内容X'
+
+			tit[0].insertBefore(tit_add,add_dom[0]);
+			con[0].appendChild(con_add);
+			/*show(con_dom[count]);
+			titOn(tit_dom[count]);//对新追加的进行高亮（还有bug）*/
+			
+		}
+		can_dom[0].onclick=function(){
+			// console.log(canarr);
+			var temp=canarr.pop();//[li,li]
+			// console.log(temp);
+			titNo(temp[0]);
+			tit[0].insertBefore(temp[0],add_dom[0]);
+			con[0].appendChild(temp[1]);		
+		}
+		
+		/*
+		*获取节点函数
+		*/
+		function $(d){
+			return document.querySelectorAll(d);
+		}
+		/*
+		*获取当前元素在兄弟节点中的索引
+		*curr:当前元素节点
+		*return:索引值
+		*/
+		function index(c){
+			var num=0,curr=c;
+			while(curr.previousElementSibling){//前面有元素节点
+				num++;
+				curr=curr.previousElementSibling;//节点更新
+			}
+			return num;
+		}
+		//内容显示与隐藏
+		function show(dom){
+			dom.style.display="block";
+		}
+		function hide(dom){
+			dom.style.display='none';
+		}
+		//给点击的标题的class追加'on'
+		function titOn(dom){
+			dom.className+="on";
+
+		}
+		//把标题的class中'on'去掉
+		function titNo(dom){
+			dom.className=dom.className.replace('on',' ').trim();
+		}
+		//判断class包不包含某项,包含返回true,不包含返回false
+		function hasClass(dom,cn){
+			var arr=dom.className.split(' ');
+			var flag=false;
+			arr.some(function(item){
+				if (item==cn){
+					flag=true;
+				}
+			})
+			return flag;
+		}
+	</script>
+</body>
+</html>
